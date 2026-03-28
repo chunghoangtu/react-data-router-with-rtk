@@ -1,0 +1,9 @@
+@import "tailwindcss";
+
+/* Nếu bạn muốn tùy chỉnh thêm font chữ toàn cục hoặc màu nền mặc định */
+@layer base {
+  body {
+    @apply antialiased bg-gray-50 text-slate-900;
+    /* Giúp chữ mượt hơn và đặt nền nhẹ nhàng */
+  }
+}
