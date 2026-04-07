@@ -9,7 +9,7 @@ type ProtectedRouteExtendedProps<T = AuthUser, R = boolean> = {
   children?: React.ReactNode
 }
 
-export const ProtectedRouteExtended = ({ isAuthorized = () => true, redirectPath = '/login', children }: ProtectedRouteExtendedProps) => {
+export const ProtectedRouteExtended = ({ isAuthorized = () => true, redirectPath = '/', children }: ProtectedRouteExtendedProps) => {
   const location = useLocation()
   const { currentUser } = useAuth()
 

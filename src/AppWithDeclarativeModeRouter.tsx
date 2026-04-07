@@ -4,10 +4,10 @@ import { BrowserRouter, Routes, Route, useNavigate, createBrowserRouter, RouterP
 
 // import type { User as AuthUser } from "@shared/types/commonTypes";
 import type { AuthUser } from "@shared/types/commonTypes";
-import { AuthProvider } from "@shared/components/AuthProvider";
+import { AuthProvider } from "@/shared/context/AuthProvider";
 import { useUser } from "@shared/hooks/useUser";
 
-import { ProtectedRouteExtended } from "@/shared/components/ProtectedRoute";
+import { ProtectedRouteExtended } from "@/shared/routing/ProtectedRoute";
 import { Layout } from "@shared/components/Layout";
 import { Login } from "@pages/Login";
 import { withLazy } from '@shared/components/withLazy';
@@ -35,7 +35,7 @@ const router = createBrowserRouter([
       { path: "/login", Component: Login },
       {
         path: "dashboard",
-        Component: ProtectedRouteExtended,
+        element: <ProtectedRouteExtended redirectPath="/login"/>,        
         children: [
           {
             index: true,
