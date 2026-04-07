@@ -1,12 +1,13 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { lazy } from "react";
-import { BrowserRouter, Routes, Route, useNavigate } from "react-router";
+import { BrowserRouter, Routes, Route, useNavigate, createBrowserRouter, RouterProvider, createRoutesFromElements } from "react-router";
 
 // import type { User as AuthUser } from "@shared/types/commonTypes";
 import type { AuthUser } from "@shared/types/commonTypes";
-import { CustomAuthProvider } from "@shared/components/AuthProvider";
+import { AuthProvider } from "@shared/components/AuthProvider";
 import { useUser } from "@shared/hooks/useUser";
 
-import { ProtectedRoute, ProtectedRouteExtended } from "@/shared/components/routing/ProtectedRoute";
+import { ProtectedRouteExtended } from "@/shared/components/ProtectedRoute";
 import { Layout } from "@shared/components/Layout";
 import { Login } from "@pages/Login";
 import { withLazy } from '@shared/components/withLazy';
@@ -26,69 +27,53 @@ const PageAuthorization = new Map<PropertyKey, (...args: AuthUser[]) => boolean>
   ['dashboard', (user: AuthUser) => user?.permissions.includes('modify')],
 ])
 
+const router = createBrowserRouter([
+  {
+    Component: AuthProvider,
+    children: [
+      { index: true, path: "/", Component: Home },
+      { path: "/login", Component: Login },
+      {
+        path: "dashboard",
+        Component: ProtectedRouteExtended,
+        children: [
+          {
+            index: true,
+            Component: Dashboard
+          }
+        ]
+      }
+    ]
+  }
+])
+
+/**
+ * We can create the routes with JSX using the createRoutesFromElements function. 
+ * This is a declarative approach for defining routes and works in the same manner as the createBrowserRouter function
+ */
+const elementRoutes = createRoutesFromElements(
+  <>
+    <Route index Component={Home} />
+    <Route path='login' Component={Login} />
+  </>
+)
+const elementRouter = createBrowserRouter(elementRoutes)
+
 const App = () => {
-  const navigate = useNavigate();
-
-  const { users, removeUserById } = useUser()
-
-  const handleRemoveUser = (userId: string | undefined) => {
-    removeUserById(userId)
-    navigate("/users");
-  };
 
   return (
     <>
-      <CustomAuthProvider>
-        <Routes>
-          <Route element={<Layout />}>
-            <Route index element={<Home />} />
-            <Route path="login" element={<Login />} />
-
-            {/* Users page only required user to be present (authenticated) */}
-            <Route element={<ProtectedRoute redirectPath="/login" />}>
-              <Route path="users" element={<Users users={users} />}>
-                <Route path=":userId" element={<User onRemoveUser={handleRemoveUser} />} />
-              </Route>
-            </Route>
-
-            {/* Admin page required user to have "admin" role */}
-            <Route element={<ProtectedRouteExtended redirectPath="/login" isAuthorized={PageAuthorization.get('admin')} />}>
-              <Route path="admin" element={<Admin />} />
-            </Route>
-
-            {/* Dashboard page required user to have "modify" permission*/}
-            <Route element={<ProtectedRouteExtended redirectPath="/login" isAuthorized={PageAuthorization.get('dashboard')} />}>
-              <Route path="dashboard" element={<Dashboard />} />
-            </Route>
-
-            <Route path="*" element={<NoMatch />} />
-          </Route>
-        </Routes>
-      </CustomAuthProvider>
+      <RouterProvider router={router} />
+      {/* <RouterProvider router={elementRouter} /> */}
     </>
   );
 };
 
-{/* Using ProtectedRoute via Outlet */ }
-{/* <Route element={<ProtectedRoute redirectPath="/login" />}>
-  <Route path="admin" element={<ProtectedRouteExtended
-    redirectPath="/login"
-    isAuthorized={PageAuthorization.get('admin')}>
-    {renderLazyPage(<Admin />)}
-  </ProtectedRouteExtended>} />
-</Route> */}
-{/* Using Protected Route as a layout Component */ }
-{/* <Route path="dashboard" element={<ProtectedRouteExtended
-  redirectPath="/login"
-  isAuthorized={PageAuthorization.get('dashboard')}>
-  {renderLazyPage(<Dashboard />)}
-</ProtectedRouteExtended>} /> */}
-
 const AppWithRouter = () => {
   return (
-    <BrowserRouter>
+    <>
       <App />
-    </BrowserRouter>
+    </>
   );
 };
 
